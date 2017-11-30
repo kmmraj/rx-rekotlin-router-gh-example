@@ -153,7 +153,7 @@ fun executeGitHubLoginTask(action: LoginAction, dispatch: DispatchFunction) {
 
 
 typealias GHLoginObservableType = Pair<LoginResultAction,Store<StateType>>
-private fun getGHLoginSingleSubscriber(): SingleObserver<GHLoginObservableType> {
+fun getGHLoginSingleSubscriber(): SingleObserver<GHLoginObservableType> {
     return object : SingleObserver<Pair<LoginResultAction,Store<StateType>>> {
 
         override fun onSubscribe(d: Disposable) {

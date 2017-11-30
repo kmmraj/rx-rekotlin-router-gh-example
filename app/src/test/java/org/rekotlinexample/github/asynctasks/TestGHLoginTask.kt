@@ -35,9 +35,6 @@ class TestGHLoginTask {
                 return LoginDataModel(userName = username,
                         token = "181818181818181818181818181818",
                         loginStatus = LoggedInState.loggedIn,
-                        fullName = "Mohanraj Karats",
-                        location = "Bengaluru",
-                        avatarUrl = "https://avatars2.githubusercontent.com/u/6253321",
                         createdAt = Date()
                 )
             }
@@ -50,6 +47,7 @@ class TestGHLoginTask {
         val ghLoginObserver = ghLoginTask.getGHLoginObserver().test()
 
         // Then
+        ghLoginObserver.assertNoErrors()
         val values = ghLoginObserver.values()
         assertThat(values.first().first.createdAt).isEqualTo(SimpleDateFormat("MMM dd, yyy").format(Date()))
 

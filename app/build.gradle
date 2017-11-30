@@ -43,7 +43,7 @@ android {
         debug {
             //Enable the line below to prevent the app from crashing.
             //testCoverageEnabled true
-            buildConfigField 'boolean', 'ENABLE_MOCKS', 'false'
+            buildConfigField 'boolean', 'ENABLE_MOCKS', 'true'
         }
         release {
             minifyEnabled false

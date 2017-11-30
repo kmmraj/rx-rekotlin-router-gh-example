@@ -2,6 +2,8 @@ package org.rekotlinexample.github.middleware
 
 import android.content.Context
 import android.content.SharedPreferences
+import io.reactivex.observers.TestObserver
+import io.reactivex.subscribers.TestSubscriber
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.Before
@@ -91,11 +93,7 @@ class TestGitHubMiddleware{
 
 
         //Then
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted { object : Runnable {
-            override fun run() {
-                assertThat(testStateReducer.mAction).isInstanceOf(LoginStartedAction::class.java)
-            }
-        }}
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted { Runnable { assertThat(testStateReducer.mAction).isInstanceOf(LoginStartedAction::class.java) } }
 
 
     }
@@ -140,12 +138,12 @@ class TestGitHubMiddleware{
         val executionResult = executeGitHubRepoListRetrieval(action = repoDetailListAction, dispatch = dispatch as DispatchFunction)
 
         //Then
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted { object : Runnable {
-            override fun run() {
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted {
+            Runnable {
                 assertThat(testStateReducer.mAction).isInstanceOf(RepoListRetrivalStartedAction::class.java)
                 assertThat(executionResult).isTrue()
             }
-        }}
+        }
 
 
     }
@@ -159,11 +157,7 @@ class TestGitHubMiddleware{
         val executionResult = executeGitHubRepoListRetrieval(action = repoDetailListAction, dispatch = dispatch as DispatchFunction)
 
         //Then
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted { object : Runnable {
-            override fun run() {
-                assertThat(executionResult).isFalse()
-            }
-        }}
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted { Runnable { assertThat(executionResult).isFalse() } }
 
     }
 
@@ -181,11 +175,24 @@ class TestGitHubMiddleware{
         val executionResult = executeGitHubRepoListRetrieval(action = repoDetailListAction, dispatch = dispatch as DispatchFunction)
 
         //Then
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted { object : Runnable {
-            override fun run() {
-                assertThat(executionResult).isTrue()
-            }
-        }}
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted { Runnable { assertThat(executionResult).isTrue() } }
 
+    }
+
+
+    @Test //@DisplayName("Validate the Subscriber when the login status is not logged in")
+    fun test_subscriber_when_login_status_is_notLoggedin(){
+        // Given
+        val loginCompletedAction = LoginResultAction(userName = "test",
+                message = "Error Message",
+                loginStatus = LoggedInState.notLoggedIn)
+        val subscriber = getGHLoginSingleSubscriber()
+        val pair = GHLoginObservableType(loginCompletedAction,testStore as Store<StateType>)
+
+        // When
+       subscriber.onSuccess(pair)
+
+        // Then
+        assertThat(testStateReducer.mAction).isInstanceOf(LoginFailedAction::class.java)
     }
 }

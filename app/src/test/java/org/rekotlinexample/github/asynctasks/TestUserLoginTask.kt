@@ -62,12 +62,12 @@ class TestUserLoginTask{
         authTask.execute()
         //Then
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted { object : Runnable {
-            override fun run() {
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted {
+            Runnable {
                 assertThat(testLoginTaskListenerMiddleware.mLoginCompletedAction).isInstanceOf(LoginCompletedAction::class.java)
                 assertThat(testLoginTaskListenerMiddleware.mLoginCompletedAction?.loginStatus).isEqualTo(LoggedInState.loggedIn)
             }
-        }}
+        }
     }
 
     @Test // @DisplayName("Verify LoginTask when passed failure returns LoggedInState_as_notLoggedIn")
@@ -103,12 +103,12 @@ class TestUserLoginTask{
         authTask.execute()
         //Then
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted { object : Runnable {
-            override fun run() {
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).untilAsserted {
+            Runnable {
                 assertThat(testLoginTaskListenerMiddleware.action).isInstanceOf(LoginCompletedAction::class.java)
                 assertThat(testLoginTaskListenerMiddleware.action?.loginStatus).isEqualTo(LoggedInState.notLoggedIn)
             }
-        }}
+        }
     }
 
 
