@@ -24,7 +24,8 @@ class UserLoginTask (val loginTaskListener: LoginTaskListenerInterface,
 
 
     override fun doInBackground(vararg params: Void): Boolean? {
-        mLoginResultAction = githubService.createToken(mEmail, mPassword)
+        val loginDataModel = githubService.createToken(mEmail, mPassword)
+        mLoginResultAction = LoginResultAction(loginDataModel)
         return true
     }
 

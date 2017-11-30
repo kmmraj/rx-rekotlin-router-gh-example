@@ -1,5 +1,6 @@
 package org.rekotlinexample.github.apirequests
 
+import org.rekotlinexample.github.actions.LoginDataModel
 import org.rekotlinexample.github.actions.LoginResultAction
 import org.rekotlinexample.github.controllers.RepoViewModel
 import org.rekotlinexample.github.states.LoggedInState
@@ -27,15 +28,15 @@ class MockGitHubApiService : GitHubApi {
         return arrayListOf<RepoViewModel>(repo1,repo2)
     }
 
-    override fun createToken(username: String, password: String): LoginResultAction {
-        return LoginResultAction(userName = username,
+    override fun createToken(username: String, password: String): LoginDataModel {
+        return LoginDataModel(userName = username,
                 token = "181818181818181818181818181818",
                 loginStatus = LoggedInState.loggedIn,
                 fullName = "Mohanraj Karats",
                 location = "Bengaluru",
                 avatarUrl = "https://avatars2.githubusercontent.com/u/6253321",
                 createdAt = Date()
-                )
+        )
     }
 
 }

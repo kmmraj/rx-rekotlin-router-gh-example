@@ -30,10 +30,10 @@ fun authenticationReducer(action: Action, state: AuthenticationState?): Authenti
     when (action) {
 
         is LoginStartedAction -> {
-             return newState.copy(isFetching = true)
+            return newState.copy(isFetching = true)
         }
         is LoginCompletedAction -> {
-             return newState.copy(isFetching = false,
+            return newState.copy(isFetching = false,
                     loggedInState = LoggedInState.loggedIn,
                     fullName = action.fullName,
                     createdAt = action.createdAt,
@@ -59,7 +59,7 @@ fun repoListReducer(action: Action, state: RepoListState?): RepoListState {
     val newState =  state ?: RepoListState()
     when (action) {
         is RepoListRetrivalStartedAction -> {
-           return newState.copy(isFetching = true)
+            return newState.copy(isFetching = true)
         }
         is RepoListCompletedAction -> {
             return newState.copy(isFetching = false,

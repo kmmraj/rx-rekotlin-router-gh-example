@@ -34,8 +34,8 @@ class TestUserLoginTask{
                 TODO()
             }
 
-            override fun createToken(username: String, password: String): LoginResultAction {
-                return LoginResultAction(userName = username,
+            override fun createToken(username: String, password: String): LoginDataModel {
+                return LoginDataModel(userName = username,
                         token = "181818181818181818181818181818",
                         loginStatus = LoggedInState.loggedIn,
                         fullName = "Mohanraj Karats",
@@ -79,8 +79,8 @@ class TestUserLoginTask{
                 TODO()
             }
 
-            override fun createToken(username: String, password: String): LoginResultAction {
-                return LoginResultAction(userName = username,
+            override fun createToken(username: String, password: String): LoginDataModel {
+                return LoginDataModel(userName = username,
                         loginStatus = LoggedInState.notLoggedIn,
                         message = "Error Message"
                 )

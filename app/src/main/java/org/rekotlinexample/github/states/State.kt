@@ -20,7 +20,7 @@ data class AuthenticationState(var loggedInState: LoggedInState,
                                var fullName: String? = null,
                                var location:String? = null,
                                var avatarUrl:String? = null,
-                               var createdAt: Date? = null): StateType
+                               var createdAt: String? = null): StateType
 
 data class RepoListState(var repoList: List<RepoViewModel>? = null,
                          var isFetching: Boolean = false,

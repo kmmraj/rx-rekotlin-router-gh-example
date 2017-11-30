@@ -8,6 +8,7 @@ package org.rekotlinexample.github.apirequests
 import org.json.JSONObject
 import org.kohsuke.github.*
 import org.kohsuke.github.GHAuthorization.*
+import org.rekotlinexample.github.actions.LoginDataModel
 import org.rekotlinexample.github.actions.LoginResultAction
 import org.rekotlinexample.github.controllers.RepoViewModel
 import org.rekotlinexample.github.states.LoggedInState
@@ -22,7 +23,7 @@ val GH_REQUIRED_SCOPE: List<String> = arrayListOf(REPO, REPO_STATUS,USER)
 
 interface GitHubApi{
     fun createToken(username: String,
-                    password: String): LoginResultAction
+                    password: String): LoginDataModel
     fun getRepoList( userName:String, token:String): List<RepoViewModel>
 }
 
@@ -64,7 +65,7 @@ class GitHubApiService : GitHubApi {
 
     @Throws(IOException::class)
     override fun createToken(username: String,
-                             password: String): LoginResultAction {
+                             password: String): LoginDataModel {
         val gitHub = GitHubBuilder()
                 .withEndpoint(GITHUB_URL)
                 .withPassword(username, password)
@@ -75,25 +76,25 @@ class GitHubApiService : GitHubApi {
         val dateTimeString: String = System.currentTimeMillis().toString()
         val note = "test-android-github-2A".plus(dateTimeString)
 
-        var loginResultAction = LoginResultAction(userName = username)
+        var loginDataModel = LoginDataModel(userName = username)
 
         try {
             val ghAuthorization = gitHub.createToken(GH_REQUIRED_SCOPE, note, null)
-            loginResultAction.token = ghAuthorization.getToken()
-            loginResultAction.loginStatus = LoggedInState.loggedIn
-            loginResultAction.fullName = gitHub.myself.name
-            loginResultAction.createdAt = gitHub.myself.createdAt
-            loginResultAction.location = gitHub.myself.location
+            loginDataModel.token = ghAuthorization.getToken()
+            loginDataModel.loginStatus = LoggedInState.loggedIn
+            loginDataModel.fullName = gitHub.myself.name
+            loginDataModel.createdAt = gitHub.myself.createdAt
+            loginDataModel.location = gitHub.myself.location
         } catch (ex: GHFileNotFoundException){
             ex.printStackTrace()
             //{"message":"Bad credentials","documentation_url":"https://developer.github.com/v3"}
-            loginResultAction.message = JSONObject(ex.message).get("message").toString()
+            loginDataModel.message = JSONObject(ex.message).get("message").toString()
         } catch (ex: Exception){
             ex.printStackTrace()
-            loginResultAction.message = JSONObject(ex.message).get("message").toString()
+            loginDataModel.message = JSONObject(ex.message).get("message").toString()
         }
 
-        return loginResultAction
+        return loginDataModel
     }
 
 }

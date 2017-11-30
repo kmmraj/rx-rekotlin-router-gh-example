@@ -5,6 +5,7 @@ import org.awaitility.Awaitility
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.rekotlinexample.github.actions.LoginCompletedAction
+import org.rekotlinexample.github.actions.LoginDataModel
 import org.rekotlinexample.github.actions.LoginResultAction
 import org.rekotlinexample.github.actions.RepoListCompletedAction
 import org.rekotlinexample.github.apirequests.GitHubApi
@@ -47,7 +48,7 @@ class TestRepoListTask {
                 return arrayListOf<RepoViewModel>(repo1,repo2)
             }
 
-            override fun createToken(username: String, password: String): LoginResultAction {
+            override fun createToken(username: String, password: String): LoginDataModel {
                 TODO()
             }
 

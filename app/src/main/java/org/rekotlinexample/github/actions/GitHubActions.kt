@@ -21,7 +21,7 @@ data class LoginCompletedAction(val userName: String,
                                 var fullName:String? = null,
                                 var location:String? = null,
                                 var avatarUrl:String? = null,
-                                var createdAt:Date? = null) : Action {
+                                var createdAt:String? = null) : Action {
     constructor(loginResultAction: LoginResultAction): this(userName = loginResultAction.userName){
         this.fullName = loginResultAction.fullName
         this.avatarUrl = loginResultAction.avatarUrl
@@ -46,17 +46,26 @@ data class LoginResultAction(val userName: String,
                              var fullName:String? = null,
                              var location:String? = null,
                              var avatarUrl:String? = null,
-                             var createdAt:Date? = null) : Action
+                             var createdAt:String? = null) : Action {
+    constructor(loginDataModel: LoginDataModel): this (userName = loginDataModel.userName){
+        this.fullName = loginDataModel.fullName
+        this.avatarUrl = loginDataModel.avatarUrl
+        this.createdAt = loginDataModel.createdAt.toString()
+        this.location = loginDataModel.location
+        this.loginStatus = loginDataModel.loginStatus
+        this.token = loginDataModel.token
+    }
+}
 class RepoDetailListAction (val userName: String? = null, var token:String? = null) : Action
 class RepoListRetrivalStartedAction : Action
 data class RepoListCompletedAction(val repoList: List<RepoViewModel>): Action
 
-class LoginData(val userName: String,
-                var token:String? = null,
-                var loginStatus: LoggedInState = LoggedInState.notLoggedIn,
-                var message:String? = null,
-                var fullName:String? = null,
-                var location:String? = null,
-                var avatarUrl:String? = null,
-                var createdAt:Date? = null)
+class LoginDataModel(val userName: String,
+                     var token:String? = null,
+                     var loginStatus: LoggedInState = LoggedInState.notLoggedIn,
+                     var message:String? = null,
+                     var fullName:String? = null,
+                     var location:String? = null,
+                     var avatarUrl:String? = null,
+                     var createdAt:Date? = null)
 

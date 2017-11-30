@@ -6,7 +6,6 @@ import org.rekotlinexample.github.actions.*
 import org.rekotlinexample.github.apirequests.MockGitHubApiService
 import org.rekotlinexample.github.asyntasks.RepoListTask
 import org.rekotlinexample.github.asyntasks.UserLoginTask
-import org.rekotlinexample.github.mainStore
 import org.rekotlinexample.github.apirequests.PreferenceApiService
 import org.rekotlinexample.github.apirequests.PreferenceApiService.GITHUB_PREFS_KEY_LOGINSTATUS
 import org.rekotlinexample.github.apirequests.PreferenceApiService.GITHUB_PREFS_KEY_TOKEN
@@ -14,10 +13,17 @@ import org.rekotlinexample.github.apirequests.PreferenceApiService.GITHUB_PREFS_
 import org.rekotlinexample.github.states.GitHubAppState
 import org.rekotlinexample.github.states.LoggedInState
 import tw.geothings.rekotlin.*
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import org.rekotlinexample.github.asyntasks.GHLoginTask
+import io.reactivex.SingleObserver
+import org.rekotlinexample.github.mainStore
+
 
 /**
-* Created by Mohanraj Karatadipalayam on 17/10/17.
-*/
+ * Created by Mohanraj Karatadipalayam on 17/10/17.
+ */
 
 
 interface LoginTaskListenerInterface {
@@ -61,17 +67,18 @@ var testAppContext = AppController.instance?.applicationContext
 internal val gitHubMiddleware: Middleware<GitHubAppState> = { dispatch, getState ->
     { next ->
         { action ->
-             when (action) {
+            when (action) {
                 is LoginAction -> {
-                    executeGitHubLogin(action, dispatch)
+                    // executeGitHubLogin(action, dispatch)
+                    executeGitHubLoginTask(action,dispatch)
                 }
-                 is LoggedInDataSaveAction -> {
-                     executeSaveLoginData(action)
-                 }
-                 is RepoDetailListAction -> {
-                     executeGitHubRepoListRetrieval(action,dispatch)
-                 }
-             }
+                is LoggedInDataSaveAction -> {
+                    executeSaveLoginData(action)
+                }
+                is RepoDetailListAction -> {
+                    executeGitHubRepoListRetrieval(action,dispatch)
+                }
+            }
 
             next(action)
 
@@ -96,7 +103,7 @@ fun executeGitHubRepoListRetrieval(action: RepoDetailListAction,dispatch: Dispat
                     userName as String,
                     token as String)
 
-            whenDebug {repoTask.githubService = MockGitHubApiService()}
+            whenTestDebug {repoTask.githubService = MockGitHubApiService()}
             repoTask.execute()
             dispatch(RepoListRetrivalStartedAction())
             return true
@@ -126,13 +133,56 @@ fun executeGitHubLogin(action: LoginAction, dispatch: DispatchFunction) {
             action.userName,
             action.password )
 
-    whenDebug { authTask.githubService = MockGitHubApiService() }
+    whenTestDebug { authTask.githubService = MockGitHubApiService() }
 
     authTask.execute()
     dispatch(LoginStartedAction(action.userName))
 }
 
-fun whenDebug(body:(() -> Unit)){
+fun executeGitHubLoginTask(action: LoginAction, dispatch: DispatchFunction) {
+
+    val ghLoginTask = GHLoginTask(action.userName,action.password)
+    whenTestDebug { ghLoginTask.githubService = MockGitHubApiService() }
+
+    ghLoginTask.getGHLoginObserver().subscribeOn(Schedulers.io())
+            ?.observeOn(AndroidSchedulers.mainThread())
+            ?.subscribe(getGHLoginSingleSubscriber())
+
+    dispatch(LoginStartedAction(action.userName))
+}
+
+
+typealias GHLoginObservableType = Pair<LoginResultAction,Store<StateType>>
+private fun getGHLoginSingleSubscriber(): SingleObserver<GHLoginObservableType> {
+    return object : SingleObserver<Pair<LoginResultAction,Store<StateType>>> {
+
+        override fun onSubscribe(d: Disposable) {
+
+        }
+
+        override fun onSuccess(value: GHLoginObservableType) {
+
+            val (loginResultAction,store) = value
+            if (loginResultAction.loginStatus == LoggedInState.notLoggedIn) {
+                store.dispatch(LoginFailedAction(userName = loginResultAction.userName,
+                        message = loginResultAction.message as String))
+
+            } else {
+                store.dispatch(LoginCompletedAction(loginResultAction))
+                store.dispatch(LoggedInDataSaveAction(userName = loginResultAction.userName,
+                        token = loginResultAction.token as String, loginStatus = LoggedInState.loggedIn))
+            }
+
+        }
+
+        override fun onError(e: Throwable) {
+            mainStore.dispatch(LoginFailedAction(userName = "",
+                    message = "Internal Error"))
+        }
+    }
+}
+
+fun whenTestDebug(body:(() -> Unit)){
     if(BuildConfig.ENABLE_MOCKS){
         body()
     }

@@ -17,6 +17,8 @@ ext {
     powermock_api_mockito2_version = "1.7.0RC2"
     robolectric_version = "3.5.1"
     awaitility_version = "3.0.0"
+    rxkotlin_version = "2.1.0"
+    rxandroid = "2.0.1"
 }
 
 android {
@@ -80,6 +82,8 @@ dependencies {
     implementation "tw.geothings.rekotlin:rekotlin:$rekotlin_version"
     implementation "org.rekotlinrouter:rekotlin-router:$rekotlin_router_version"
     implementation "org.kohsuke:github-api:$github_api_version"
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
+    implementation "io.reactivex.rxjava2:rxandroid:$rxandroid"
 
 
 
