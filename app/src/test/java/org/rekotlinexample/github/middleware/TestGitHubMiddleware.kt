@@ -195,4 +195,20 @@ class TestGitHubMiddleware{
         // Then
         assertThat(testStateReducer.mAction).isInstanceOf(LoginFailedAction::class.java)
     }
+
+    @Test //@DisplayName("Validate the Subscriber when the login status is logged in")
+    fun test_subscriber_when_login_status_is_Loggedin(){
+        // Given
+        val loginCompletedAction = LoginResultAction(userName = "test",
+                token = "969696969696969696",
+                loginStatus = LoggedInState.loggedIn)
+        val subscriber = getGHLoginSingleSubscriber()
+        val pair = GHLoginObservableType(loginCompletedAction,testStore as Store<StateType>)
+
+        // When
+        subscriber.onSuccess(pair)
+
+        // Then
+        assertThat(testStateReducer.mAction).isInstanceOf(LoggedInDataSaveAction::class.java)
+    }
 }
