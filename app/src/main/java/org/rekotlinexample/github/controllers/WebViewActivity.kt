@@ -14,7 +14,7 @@ class WebViewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_web_view)
-        val myWebView = findViewById(R.id.webview) as WebView
+        val myWebView = findViewById<WebView>(R.id.webview) as WebView
         val repo = intent.getParcelableExtra<RepoViewModel>("repo")
         myWebView.loadUrl(repo.htmlUrl)
     }

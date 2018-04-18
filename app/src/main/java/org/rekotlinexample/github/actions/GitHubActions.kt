@@ -67,5 +67,5 @@ class LoginDataModel(val userName: String,
                      var fullName:String? = null,
                      var location:String? = null,
                      var avatarUrl:String? = null,
-                     var createdAt:Date? = null)
+                     var createdAt:Date? = Date())
 

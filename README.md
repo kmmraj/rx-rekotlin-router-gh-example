@@ -9,3 +9,6 @@ A github example, build with [ReKotlin](https://github.com/ReKotlin/ReKotlin) an
 1. Clone this repository
 2. Open in android studio.
 3. Build & Run.
+
+## Unit Testing
+1. Be sure, you are selecting the build variant as `debugTest`

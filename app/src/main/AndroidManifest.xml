@@ -23,7 +23,7 @@
         </activity>
         <activity android:name=".controllers.RepoListActivity" />
         <activity android:name=".controllers.WebViewActivity" />
-        <activity android:name=".controllers.WelcomeActivity"></activity>
+        <activity android:name=".controllers.WelcomeActivity"/>
     </application>
 
 </manifest>

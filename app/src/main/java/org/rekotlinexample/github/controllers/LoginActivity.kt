@@ -4,6 +4,7 @@ package org.rekotlinexample.github.controllers
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -11,6 +12,7 @@ import android.widget.Toast
 import org.rekotlinexample.github.R
 import org.rekotlinexample.github.actions.LoginAction
 import org.rekotlinexample.github.mainStore
+import org.rekotlinexample.github.middleware.LoginMiddleWare
 import org.rekotlinexample.github.routes.loginRoute
 import org.rekotlinexample.github.routes.repoListRoute
 import org.rekotlinexample.github.states.AuthenticationState
@@ -23,29 +25,30 @@ interface NextActivityHandler{
     fun startNextActivity()
 }
 
-class LoginActivity : Activity(), StoreSubscriber<AuthenticationState>, NextActivityHandler {
+class LoginActivity : AppCompatActivity(), StoreSubscriber<AuthenticationState>, NextActivityHandler {
 
+    val TAG = "LoginActivity"
 
     // UI references.
     private val mETEmail: EditText by lazy {
-        this.findViewById(R.id.email) as EditText
+        this.findViewById<EditText>(R.id.email) as EditText
     }
     private val mETPassword: EditText by lazy {
-       this.findViewById(R.id.password) as EditText
+       this.findViewById<EditText>(R.id.password) as EditText
     }
     private val mViewProgress: View by lazy {
-        this.findViewById(R.id.login_progress)
+        this.findViewById<View>(R.id.login_progress)
     }
 
 //    private val mViewProgressContainer: View by lazy {
 //        this.findViewById(R.id.progressBarContainer)
 //    }
     private val mViewForm: View by lazy {
-        this.findViewById(R.id.login_progress)
+        this.findViewById<View>(R.id.login_progress)
     }
 
     private val mEmailSignInButton: Button by lazy {
-        this.findViewById(R.id.email_sign_in_button) as Button
+        this.findViewById<Button>(R.id.email_sign_in_button) as Button
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,11 +70,13 @@ class LoginActivity : Activity(), StoreSubscriber<AuthenticationState>, NextActi
 
 
         initRoute()
+//        getLifecycle().addObserver(LoginMiddleWare)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         mainStore.unsubscribe(this)
+//        getLifecycle().removeObserver(LoginMiddleWare)
     }
 
     private fun initRoute() {
@@ -121,7 +126,7 @@ class LoginActivity : Activity(), StoreSubscriber<AuthenticationState>, NextActi
         return false
     }
 
-    fun startRepoListActivity(){
+    private fun startRepoListActivity(){
         val routes = arrayListOf(loginRoute, repoListRoute)
         val action = SetRouteAction(route = routes)
         mainStore.dispatch(action)
@@ -133,7 +138,7 @@ class LoginActivity : Activity(), StoreSubscriber<AuthenticationState>, NextActi
          this.startActivity(repoListIntent)
     }
 
-    }
+}
 
 
 

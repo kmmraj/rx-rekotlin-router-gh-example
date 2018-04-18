@@ -1,5 +1,9 @@
 package org.rekotlinexample.github.middleware
 
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleObserver
+import android.arch.lifecycle.OnLifecycleEvent
+import android.util.Log
 import org.rekotlinexample.github.AppController
 import org.rekotlinexample.github.BuildConfig
 import org.rekotlinexample.github.actions.*
@@ -18,6 +22,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.rekotlinexample.github.asyntasks.GHLoginTask
 import io.reactivex.SingleObserver
+import io.reactivex.disposables.CompositeDisposable
 import org.rekotlinexample.github.mainStore
 
 
@@ -62,15 +67,18 @@ class RepoListTaskListenerMiddleware: RepoListTaskListenerInterface {
 }
 
 // App context for UT, must be never set in app run
-var testAppContext = AppController.instance?.applicationContext
+var testAppContext = AppController.mInstance?.applicationContext
+typealias GHLoginObservableType = Pair<LoginResultAction,Store<StateType>>
 
-internal val gitHubMiddleware: Middleware<GitHubAppState> = { dispatch, getState ->
+
+
+  val gitHubMiddleware: Middleware<GitHubAppState> = { dispatch, getState ->
     { next ->
         { action ->
             when (action) {
                 is LoginAction -> {
                     // executeGitHubLogin(action, dispatch)
-                    executeGitHubLoginTask(action,dispatch)
+                    LoginMiddleWare.executeGitHubLoginTask(action,dispatch)
                 }
                 is LoggedInDataSaveAction -> {
                     executeSaveLoginData(action)
@@ -90,7 +98,7 @@ fun executeGitHubRepoListRetrieval(action: RepoDetailListAction,dispatch: Dispat
 
     var userName: String? = action.userName
     var token: String? = action.token
-    val context = testAppContext ?: AppController.instance?.applicationContext
+    val context = testAppContext ?: AppController.mInstance?.applicationContext
     context?.let {
         userName = PreferenceApiService.getPreference(context, GITHUB_PREFS_KEY_USERNAME)
         token = PreferenceApiService.getPreference(context, GITHUB_PREFS_KEY_TOKEN)
@@ -114,7 +122,7 @@ fun executeGitHubRepoListRetrieval(action: RepoDetailListAction,dispatch: Dispat
 }
 
 private fun executeSaveLoginData(action: LoggedInDataSaveAction) {
-    val context = testAppContext ?: AppController.instance?.applicationContext
+    val context = testAppContext ?: AppController.mInstance?.applicationContext
     context?.let {
         PreferenceApiService.savePreference(context,
                 GITHUB_PREFS_KEY_TOKEN, action.token)
@@ -139,25 +147,43 @@ fun executeGitHubLogin(action: LoginAction, dispatch: DispatchFunction) {
     dispatch(LoginStartedAction(action.userName))
 }
 
-fun executeGitHubLoginTask(action: LoginAction, dispatch: DispatchFunction) {
+object LoginMiddleWare : LifecycleObserver {
+
+    val TAG = "LoginMiddleWare"
+//    lateinit var compositeDisposable: CompositeDisposable
+
+    fun executeGitHubLoginTask(action: LoginAction, dispatch: DispatchFunction) {
 
     val ghLoginTask = GHLoginTask(action.userName,action.password)
     whenTestDebug { ghLoginTask.githubService = MockGitHubApiService() }
-
-    ghLoginTask.getGHLoginObserver().subscribeOn(Schedulers.io())
+    val test = ghLoginTask.getGHLoginObservable().subscribeOn(Schedulers.io())
             ?.observeOn(AndroidSchedulers.mainThread())
-            ?.subscribe(getGHLoginSingleSubscriber())
+            ?.subscribeWith(getGHLoginSingleSubscriber())
 
     dispatch(LoginStartedAction(action.userName))
-}
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun init() {
+        Log.d(TAG,"Inside init function")
+//        compositeDisposable = CompositeDisposable()
+        // TODO: - Create a disposable out of the trait and dispose it
+//        compositeDisposable.add( )
+//        getGHLoginSingleSubscriber().onSubscribe()
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun destroy(){
+        Log.d(TAG,"Inside destroy function")
+//        compositeDisposable.dispose()
+    }
 
 
-typealias GHLoginObservableType = Pair<LoginResultAction,Store<StateType>>
-fun getGHLoginSingleSubscriber(): SingleObserver<GHLoginObservableType> {
+    fun getGHLoginSingleSubscriber(): SingleObserver<GHLoginObservableType> {
     return object : SingleObserver<Pair<LoginResultAction,Store<StateType>>> {
 
         override fun onSubscribe(d: Disposable) {
-
+//            compositeDisposable.add(d)
         }
 
         override fun onSuccess(value: GHLoginObservableType) {
@@ -180,6 +206,8 @@ fun getGHLoginSingleSubscriber(): SingleObserver<GHLoginObservableType> {
                     message = "Internal Error"))
         }
     }
+}
+
 }
 
 fun whenTestDebug(body:(() -> Unit)){

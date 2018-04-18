@@ -1,8 +1,6 @@
 package org.rekotlinexample.github
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import com.squareup.leakcanary.LeakCanary
 import org.rekotlinexample.github.actions.LoggedInDataSaveAction
 import org.rekotlinexample.github.middleware.gitHubMiddleware
@@ -25,19 +23,11 @@ import tw.geothings.rekotlin.Store
 var mainStore = Store(state = null,
         reducer = ::appReducer,
         middleware = arrayListOf(gitHubMiddleware))
+        //middleware = emptyList())
 
-private var mInstance: AppController? = null
 var router: Router<GitHubAppState>? = null
 
 class AppController : Application() {
-
-    //Creating sharedpreferences object
-    //We will store the user data in sharedpreferences
-    private val sharedPreference: SharedPreferences by lazy {
-        PreferenceApiService.getSharedPreferenceByName(context = applicationContext,
-                sharedPreferenceKey = PreferenceApiService.GITHUB_PREFS_NAME)
-    }
-
 
 
     override fun onCreate() {
@@ -50,8 +40,8 @@ class AppController : Application() {
         }
         LeakCanary.install(this)
 
+
         mInstance = this
-        instance = this
         val loginState = getLogedInState()
 
         val authenticationState = AuthenticationState(loggedInState = loginState.loginStatus,
@@ -60,7 +50,6 @@ class AppController : Application() {
                 authenticationState = authenticationState,
                 repoListState = RepoListState())
         mainStore = Store(state = state,
-//                reducer = ::loginReducer,
                 reducer = ::appReducer,
                 middleware = arrayListOf(gitHubMiddleware),
                 automaticallySkipRepeats = true)
@@ -75,29 +64,9 @@ class AppController : Application() {
     }
 
 
-
-    fun persistUserDetails(email: String,token:String) {
-        var editor = sharedPreference.edit()
-        editor.putString(PreferenceApiService.GITHUB_PREFS_NAME, email)
-        editor.putString(PreferenceApiService.GITHUB_PREFS_KEY_TOKEN, token)
-        editor.putBoolean(PreferenceApiService.GITHUB_PREFS_KEY_LOGINSTATUS, true)
-        editor.apply()
-    }
-
-    //This method will clear the sharedpreference
-    //It will be called on logout
-    fun clearUserDetails() {
-        val editor = sharedPreference.edit()
-        editor.clear()
-        editor.apply()
-    }
-
     fun getLogedInState(): LoggedInDataSaveAction {
         val token = PreferenceApiService.getPreference(applicationContext, PreferenceApiService.GITHUB_PREFS_KEY_TOKEN)
-//        var loginState: LoggedInState = LoggedInState.notLoggedIn
-//        if (mToken != null){
-//            loginState = LoggedInState.loggedIn
-//        }
+
         val userName: String? = PreferenceApiService.getPreference(applicationContext, PreferenceApiService.GITHUB_PREFS_KEY_USERNAME)
 
         val loginStateString = PreferenceApiService.getPreference(applicationContext, PreferenceApiService.GITHUB_PREFS_KEY_LOGINSTATUS)
@@ -114,23 +83,9 @@ class AppController : Application() {
 
     companion object {
 
-        //Getting tag it will be used for displaying log and it is optional
-        val TAG = AppController::class.java.simpleName
-
-
-        //Creating class object
-        //Public static method to get the instance of this class
-        @get:Synchronized var instance: AppController? = null
+        @get:Synchronized var mInstance: AppController? = null
             private set
 
-        fun getAppController(context: Context): AppController {
-            if (instance == null) {
-                //Create instance
-                instance = AppController()
-            }
-
-            return instance as AppController
-        }
     }
 
 

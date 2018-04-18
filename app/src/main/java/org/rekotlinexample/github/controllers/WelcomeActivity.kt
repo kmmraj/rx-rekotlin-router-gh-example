@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import org.rekotlinexample.github.R
 import org.rekotlinexample.github.mainStore
+import org.rekotlinexample.github.middleware.LoginMiddleWare
 import org.rekotlinexample.github.routes.loginRoute
 import org.rekotlinexample.github.routes.repoListRoute
 import org.rekotlinexample.github.routes.welcomeRoute
@@ -22,22 +23,22 @@ class WelcomeActivity : AppCompatActivity(), StoreSubscriber<GitHubAppState> {
     val TAG = "WelcomeActivity"
 
     private val mTvWelcomeUser: TextView by lazy {
-        this.findViewById(R.id.tv_user_name) as TextView
+        this.findViewById<TextView>(R.id.tv_user_name) as TextView
     }
 
     private val mTvRepoCountDescription: TextView by lazy {
-        this.findViewById(R.id.tv_repo_count_description) as TextView
+        this.findViewById<TextView>(R.id.tv_repo_count_description) as TextView
     }
 
     private val mTvUserCreatedAt: TextView by lazy {
-        this.findViewById(R.id.tv_createdAt) as TextView
+        this.findViewById<TextView>(R.id.tv_createdAt) as TextView
     }
 
     private val mBtnViewRepo: Button by lazy {
-        this.findViewById(R.id.btn_viewRepo) as Button
+        this.findViewById<Button>(R.id.btn_viewRepo) as Button
     }
     private val mTvLocation: TextView by lazy {
-        this.findViewById(R.id.tv_location) as TextView
+        this.findViewById<TextView>(R.id.tv_location) as TextView
     }
 
     override fun newState(state: GitHubAppState) {
@@ -68,6 +69,8 @@ class WelcomeActivity : AppCompatActivity(), StoreSubscriber<GitHubAppState> {
             }
             false
         })
+
+       // LoginMiddleWare.init()
     }
 
     fun startRepoListActivity(){

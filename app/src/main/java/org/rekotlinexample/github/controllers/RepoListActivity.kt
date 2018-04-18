@@ -26,10 +26,10 @@ import tw.geothings.rekotlin.StoreSubscriber
 class RepoListActivity : AppCompatActivity(), AdapterView.OnItemClickListener, StoreSubscriber<RepoListState> {
 
     private val mViewProgress: View by lazy {
-        this.findViewById(R.id.pb_progress)
+        this.findViewById<View>(R.id.pb_progress)
     }
     private val mViewForm: View by lazy {
-        this.findViewById(R.id.repo_cell)
+        this.findViewById<View>(R.id.repo_cell)
     }
 
     var mListOfRepos: List<RepoViewModel>? = null
@@ -49,6 +49,8 @@ class RepoListActivity : AppCompatActivity(), AdapterView.OnItemClickListener, S
 
 
 
+
+
     override fun onDestroy() {
         super.onDestroy()
         mainStore.unsubscribe(this)
@@ -63,7 +65,7 @@ class RepoListActivity : AppCompatActivity(), AdapterView.OnItemClickListener, S
 
 
     fun createRepoListView() {
-       val listView: ListView =  findViewById(R.id.repo_cell) as ListView
+       val listView: ListView =  findViewById<ListView>(R.id.repo_cell) as ListView
         mRepoListViewAdapter = RepoListAdapter()
         listView.adapter = mRepoListViewAdapter
         listView.isClickable = true
@@ -125,11 +127,7 @@ class RepoListActivity : AppCompatActivity(), AdapterView.OnItemClickListener, S
 
     private inner class RepoListAdapter internal constructor() : BaseAdapter() {
 
-        private val layoutInflater: LayoutInflater
-
-        init {
-            layoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        }
+        private val layoutInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getCount(): Int {
             return mListOfRepos?.size ?: 0
@@ -147,11 +145,11 @@ class RepoListActivity : AppCompatActivity(), AdapterView.OnItemClickListener, S
             if (convertView == null) {
                 convertView = layoutInflater.inflate(R.layout.repo_cell, null)
                 val viewHolder = ViewHolder()
-                viewHolder.tvRepoName = convertView?.findViewById(R.id.tv_repo_name) as TextView
-                viewHolder.tvRepoFullName = convertView.findViewById(R.id.tv_repo_fullname) as TextView
-                viewHolder.tvRepoForksCount = convertView.findViewById(R.id.tv_repo_forks) as TextView
-                viewHolder.tvRepoStarsCount = convertView.findViewById(R.id.tv_repo_stars) as TextView
-                viewHolder.tvRepolanguage = convertView.findViewById(R.id.tv_repo_language) as TextView
+                viewHolder.tvRepoName = convertView?.findViewById<TextView>(R.id.tv_repo_name) as TextView
+                viewHolder.tvRepoFullName = convertView.findViewById<TextView>(R.id.tv_repo_fullname) as TextView
+                viewHolder.tvRepoForksCount = convertView.findViewById<TextView>(R.id.tv_repo_forks) as TextView
+                viewHolder.tvRepoStarsCount = convertView.findViewById<TextView>(R.id.tv_repo_stars) as TextView
+                viewHolder.tvRepolanguage = convertView.findViewById<TextView>(R.id.tv_repo_language) as TextView
                 convertView.tag = viewHolder
             }
             val viewHolder = convertView.tag as ViewHolder

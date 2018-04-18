@@ -14,7 +14,11 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
 import org.rekotlinexample.github.actions.*
+import org.rekotlinexample.github.apirequests.GitHubApi
+import org.rekotlinexample.github.asyntasks.GHLoginTask
+import org.rekotlinexample.github.controllers.RepoViewModel
 import org.rekotlinexample.github.mainStore
+import org.rekotlinexample.github.middleware.LoginMiddleWare.getGHLoginSingleSubscriber
 import org.rekotlinexample.github.states.LoggedInState
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -22,6 +26,8 @@ import tw.geothings.rekotlin.Action
 import tw.geothings.rekotlin.DispatchFunction
 import tw.geothings.rekotlin.StateType
 import tw.geothings.rekotlin.Store
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 
@@ -30,35 +36,20 @@ import java.util.concurrent.TimeUnit
 class TestGitHubMiddleware{
 
     internal data class TestState(var name:String? = null, var password:String? = null):StateType
-    internal class TestAction(var name:String? = null, var password:String? = null): Action
+    //internal class TestAction(var name:String? = null, var password:String? = null): Action
     internal class TestStateReducer {
-        var mAction: Action? = null
+        lateinit var mAction: Action
         fun handleAction(action: Action, state: TestState?): TestState {
             @Suppress("NAME_SHADOWING")
-            var state = state ?: TestState()
-
-            when(action){
-                is TestAction -> {
-                    state = state.copy(name = action.name)
-                }
-//                is LoginStartedAction -> {
-//                    mAction = action
-//                }
-//                is RepoListRetrivalStartedAction -> {
-//                    mAction = action
-//                }
-                else -> {
-                    mAction = action
-                }
-            }
-
+            val state = state ?: TestState()
+            mAction = action
             return state
         }
     }
 
-    var dispatch: ((Action) -> Unit)? = null
-    internal val testStateReducer = TestStateReducer()
-    internal var testStore: Store<TestState>? = null
+    private lateinit var dispatch: ((Action) -> Unit)
+    private val testStateReducer = TestStateReducer()
+    private lateinit var testStore: Store<TestState>
 
     @Before
     fun setUp(){
@@ -68,9 +59,7 @@ class TestGitHubMiddleware{
                 state = TestState(),
                 middleware = arrayListOf()
         )
-        dispatch = {action: Action ->
-            testStore?.dispatch(action)
-        }
+        dispatch = testStore::dispatch
 
     }
 
@@ -210,5 +199,40 @@ class TestGitHubMiddleware{
 
         // Then
         assertThat(testStateReducer.mAction).isInstanceOf(LoggedInDataSaveAction::class.java)
+    }
+
+
+    @Test  // @DisplayName("Verify Subscription when passed success dispatches LoggedInDataSaveAction")
+    fun test_subscription_when_passed_success_dispatches_LoggedInDataSaveAction(){
+
+        //Given
+        val loginResultAction = LoginResultAction(userName = "test",
+                loginStatus = LoggedInState.loggedIn,
+                token = "161816181618")
+
+        // When
+        val ghLoginSubscriber = getGHLoginSingleSubscriber()
+        ghLoginSubscriber.onSuccess(Pair(loginResultAction, testStore as Store<StateType>))
+
+        // Then
+        assertThat(testStateReducer.mAction).isInstanceOf(LoggedInDataSaveAction::class.java)
+
+    }
+
+    @Test  // @DisplayName("Verify Subscription when passed success dispatches LoggedInDataSaveAction")
+    fun test_subscription_when_passed_error_dispatches_LoggedInDataSaveAction(){
+
+        //Given
+        val loginResultAction = LoginResultAction(userName = "test",
+                message = "Some Error Message",
+                loginStatus = LoggedInState.notLoggedIn)
+
+        // When
+        val ghLoginSubscriber = getGHLoginSingleSubscriber()
+        ghLoginSubscriber.onSuccess(Pair(loginResultAction, testStore as Store<StateType>))
+
+        // Then
+        assertThat(testStateReducer.mAction).isInstanceOf(LoginFailedAction::class.java)
+
     }
 }

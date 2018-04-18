@@ -32,7 +32,7 @@ class GHLoginTask (val mEmail: String,
     }
 
 
-    fun getGHLoginObserver(): Single<GHLoginObservableType> {
+    fun getGHLoginObservable(): Single<GHLoginObservableType> {
         return mGHLoginSingle
     }
 }
