@@ -2,8 +2,6 @@ package org.rekotlinexample.github.middleware
 
 import android.content.Context
 import android.content.SharedPreferences
-import io.reactivex.observers.TestObserver
-import io.reactivex.subscribers.TestSubscriber
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility.await
 import org.junit.Before
@@ -14,10 +12,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
 import org.rekotlinexample.github.actions.*
-import org.rekotlinexample.github.apirequests.GitHubApi
-import org.rekotlinexample.github.asyntasks.GHLoginTask
-import org.rekotlinexample.github.controllers.RepoViewModel
-import org.rekotlinexample.github.mainStore
 import org.rekotlinexample.github.middleware.LoginMiddleWare.getGHLoginSingleSubscriber
 import org.rekotlinexample.github.states.LoggedInState
 import org.robolectric.RobolectricTestRunner
@@ -26,8 +20,6 @@ import tw.geothings.rekotlin.Action
 import tw.geothings.rekotlin.DispatchFunction
 import tw.geothings.rekotlin.StateType
 import tw.geothings.rekotlin.Store
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 

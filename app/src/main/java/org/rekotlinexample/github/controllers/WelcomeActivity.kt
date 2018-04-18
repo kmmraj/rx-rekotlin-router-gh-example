@@ -9,7 +9,6 @@ import android.widget.Button
 import android.widget.TextView
 import org.rekotlinexample.github.R
 import org.rekotlinexample.github.mainStore
-import org.rekotlinexample.github.middleware.LoginMiddleWare
 import org.rekotlinexample.github.routes.loginRoute
 import org.rekotlinexample.github.routes.repoListRoute
 import org.rekotlinexample.github.routes.welcomeRoute

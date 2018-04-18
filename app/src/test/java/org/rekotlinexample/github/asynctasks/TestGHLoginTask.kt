@@ -3,17 +3,14 @@ package org.rekotlinexample.github.asynctasks
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.rekotlinexample.github.actions.LoginCompletedAction
 import org.rekotlinexample.github.actions.LoginDataModel
 import org.rekotlinexample.github.actions.LoginResultAction
 import org.rekotlinexample.github.apirequests.GitHubApi
 import org.rekotlinexample.github.asyntasks.GHLoginTask
 import org.rekotlinexample.github.controllers.RepoViewModel
-import org.rekotlinexample.github.middleware.LoginMiddleWare.getGHLoginSingleSubscriber
 import org.rekotlinexample.github.states.LoggedInState
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import tw.geothings.rekotlin.Store
 import java.text.SimpleDateFormat
 import java.util.*
 

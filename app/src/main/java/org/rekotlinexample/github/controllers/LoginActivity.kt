@@ -1,7 +1,6 @@
 package org.rekotlinexample.github.controllers
 
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -12,7 +11,6 @@ import android.widget.Toast
 import org.rekotlinexample.github.R
 import org.rekotlinexample.github.actions.LoginAction
 import org.rekotlinexample.github.mainStore
-import org.rekotlinexample.github.middleware.LoginMiddleWare
 import org.rekotlinexample.github.routes.loginRoute
 import org.rekotlinexample.github.routes.repoListRoute
 import org.rekotlinexample.github.states.AuthenticationState
