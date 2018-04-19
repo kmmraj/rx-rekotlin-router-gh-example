@@ -2,15 +2,12 @@ package org.rekotlinexample.github.asynctasks
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.rekotlinexample.github.actions.LoginDataModel
 import org.rekotlinexample.github.actions.LoginResultAction
 import org.rekotlinexample.github.apirequests.GitHubApi
 import org.rekotlinexample.github.asyntasks.GHLoginTask
 import org.rekotlinexample.github.controllers.RepoViewModel
 import org.rekotlinexample.github.states.LoggedInState
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,9 +16,7 @@ import java.util.*
 * Created by Mohanraj Karatadipalayam on 28/11/17.
 */
 
-@Config(manifest= Config.NONE)
-@RunWith(RobolectricTestRunner::class)
-class TestGHLoginTask {
+class TestGHLoginObservable {
 
     @Test  // @DisplayName("Verify LoginTask when passed success returns LoggedInState_as_loggedIn")
     fun test_LoginTask_returns_LoggedInState_as_loggedIn(){
