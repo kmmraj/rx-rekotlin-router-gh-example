@@ -80,11 +80,11 @@ class GitHubApiService : GitHubApi {
 
         try {
             val ghAuthorization = gitHub.createToken(GH_REQUIRED_SCOPE, note, null)
-            loginDataModel.token = ghAuthorization.getToken()
+            loginDataModel.token = ghAuthorization.token
             loginDataModel.loginStatus = LoggedInState.loggedIn
-            loginDataModel.fullName = gitHub.myself.name
-            loginDataModel.createdAt = gitHub.myself.createdAt
-            loginDataModel.location = gitHub.myself.location
+            loginDataModel.fullName = gitHub.getMyself().getName()
+            loginDataModel.createdAt = gitHub.getMyself().getCreatedAt()
+            loginDataModel.location = gitHub.getMyself().getLocation()
         } catch (ex: GHFileNotFoundException){
             ex.printStackTrace()
             //{"message":"Bad credentials","documentation_url":"https://developer.github.com/v3"}

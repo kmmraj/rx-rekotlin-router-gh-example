@@ -9,7 +9,7 @@ gradlew*
 /captures
 .externalNativeBuild
 build/
-projectFilesBackup/
+projectFilesBackup*/
 gradle/
 .gradle/
 .idea/**

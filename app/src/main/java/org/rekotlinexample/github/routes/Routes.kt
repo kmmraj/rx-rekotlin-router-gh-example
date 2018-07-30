@@ -25,21 +25,21 @@ val repoDetailRoute: RouteElementIdentifier = "WebViewActivity"
 
 object RoutableHelper {
 
-     fun createWelcomeRoutable(context: Context): WelcomeRoutable {
+     fun createWelcomeActivityAndRoutable(context: Context): WelcomeRoutable {
         val welcomeIntent = Intent(context, WelcomeActivity::class.java)
         welcomeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(welcomeIntent)
         return WelcomeRoutable(context)
     }
 
-    fun createRepoListRoutable(context: Context): RepoListRoutable {
+    fun createRepoListActivityAndRoutable(context: Context): RepoListRoutable {
         val repoListIntent = Intent(context, RepoListActivity::class.java)
         repoListIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(repoListIntent)
         return RepoListRoutable(context)
     }
 
-    fun createRepoDetailRoutable(context: Context): RepoDetailRoutable {
+    fun createRepoDetailActivityAndRoutable(context: Context): RepoDetailRoutable {
         val repoDetailIntent = Intent(context, WebViewActivity::class.java)
         val currentRoute = mainStore.state.navigationState.route
         val intentData = mainStore.state.navigationState.getRouteSpecificState<RepoViewModel>(currentRoute)
@@ -50,12 +50,37 @@ object RoutableHelper {
     }
 }
 
+//TODO: check this option of open class
+open class BasicRoutable(open var context: Context): Routable {
+    override fun changeRouteSegment(from: RouteElementIdentifier,
+                                    to: RouteElementIdentifier,
+                                    animated: Boolean,
+                                    completionHandler: RoutingCompletionHandler): Routable {
 
-class RootRoutable(val context: Context): Routable {
+        return BasicRoutable(context)
+    }
+
     override fun popRouteSegment(routeElementIdentifier: RouteElementIdentifier,
                                  animated: Boolean,
                                  completionHandler: RoutingCompletionHandler) {
+        completionHandler()
+
     }
+
+    override fun pushRouteSegment(routeElementIdentifier: RouteElementIdentifier,
+                                  animated: Boolean,
+                                  completionHandler: RoutingCompletionHandler): Routable {
+        return BasicRoutable(context)
+    }
+
+}
+
+
+class RootRoutable(override  var context: Context): BasicRoutable(context) {
+//    override fun popRouteSegment(routeElementIdentifier: RouteElementIdentifier,
+//                                 animated: Boolean,
+//                                 completionHandler: RoutingCompletionHandler) {
+//    }
 
     override fun pushRouteSegment(routeElementIdentifier: RouteElementIdentifier,
                                   animated: Boolean,
@@ -63,18 +88,18 @@ class RootRoutable(val context: Context): Routable {
         if(routeElementIdentifier == loginRoute) {
             return LoginRoutable(context)
         } else if (routeElementIdentifier == welcomeRoute) {
-            return RoutableHelper.createWelcomeRoutable(context)
+            return RoutableHelper.createWelcomeActivityAndRoutable(context)
         }
 
         return LoginRoutable(context)
     }
 
-    override fun changeRouteSegment(from: RouteElementIdentifier,
-                                    to: RouteElementIdentifier,
-                                    animated: Boolean,
-                                    completionHandler: RoutingCompletionHandler): Routable {
-       TODO("not implemented")
-    }
+//    override fun changeRouteSegment(from: RouteElementIdentifier,
+//                                    to: RouteElementIdentifier,
+//                                    animated: Boolean,
+//                                    completionHandler: RoutingCompletionHandler): Routable {
+//       TODO("not implemented")
+//    }
 
 }
 
@@ -83,7 +108,7 @@ class LoginRoutable(val context: Context) : Routable {
     val TAG = "Router LoginRoutable"
     override fun changeRouteSegment(from: RouteElementIdentifier, to: RouteElementIdentifier, animated: Boolean, completionHandler: RoutingCompletionHandler): Routable {
         if (from == repoListRoute && to == welcomeRoute) {
-            return RoutableHelper.createWelcomeRoutable(context)
+            return RoutableHelper.createWelcomeActivityAndRoutable(context)
         } else{
             return this
         }
@@ -95,9 +120,9 @@ class LoginRoutable(val context: Context) : Routable {
 
     override fun pushRouteSegment(routeElementIdentifier: RouteElementIdentifier, animated: Boolean, completionHandler: RoutingCompletionHandler): Routable {
         if(routeElementIdentifier == repoListRoute){
-            return RoutableHelper.createRepoListRoutable(context)
+            return RoutableHelper.createRepoListActivityAndRoutable(context)
         } else if (routeElementIdentifier == welcomeRoute) {
-            return RoutableHelper.createWelcomeRoutable(context)
+            return RoutableHelper.createWelcomeActivityAndRoutable(context)
         } else {
             Log.d(TAG,"Fatal Errror --- start of arbitarty route")
             return RepoListRoutable(context)
@@ -121,7 +146,7 @@ class RepoListRoutable (val context: Context): Routable {
 
     override fun pushRouteSegment(routeElementIdentifier: RouteElementIdentifier, animated: Boolean, completionHandler: RoutingCompletionHandler): Routable {
         if(routeElementIdentifier == repoDetailRoute){
-           return RoutableHelper.createRepoDetailRoutable(context)
+           return RoutableHelper.createRepoDetailActivityAndRoutable(context)
         }
         return RepoDetailRoutable(context)
     }
@@ -155,7 +180,7 @@ class WelcomeRoutable (val context: Context): Routable {
 
     override fun pushRouteSegment(routeElementIdentifier: RouteElementIdentifier, animated: Boolean, completionHandler: RoutingCompletionHandler): Routable {
         if (routeElementIdentifier == repoListRoute) {
-            return RoutableHelper.createRepoListRoutable(context)
+            return RoutableHelper.createRepoListActivityAndRoutable(context)
         } else {
             TODO("not implemented")
             return RepoListRoutable(context)
