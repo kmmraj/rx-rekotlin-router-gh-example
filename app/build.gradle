@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.apollographql.android'
 apply plugin: 'kotlin-android'
+
 
 
 ext {
@@ -7,7 +9,9 @@ ext {
     rxkotlin_version = "2.1.0"
     rxandroid = "2.0.1"
     rekotlin_router_version = "0.1.4"
+
     github_api_version = "1.93"
+    apollo_gradle_plugin_version = "1.0.0-alpha"
 
     //android_support_lib_version = "25.3.1"
     constraint_layout_version = "1.0.2"
@@ -23,6 +27,8 @@ ext {
     awaitility_version = "3.0.0"
     leakcanary_android_version = "1.5.4"
 
+    AUTH = "cc7d31d28fd610c02138edc1d8a9d21468754094"
+
 }
 
 android {
@@ -32,6 +38,7 @@ android {
         applicationId "org.rekotlin.rekotlinrouterexample"
         minSdkVersion 16
         targetSdkVersion 26
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -46,17 +53,24 @@ android {
     buildTypes {
         debug {
             //Enable the line below to prevent the app from crashing.
-            testCoverageEnabled true
+            testCoverageEnabled false
             buildConfigField 'boolean', 'ENABLE_MOCKS', 'true'
+            buildConfigField 'String', 'AUTH_TOKEN', '"cc7d31d28fd610c02138edc1d8a9d21468754094"'
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debugTest {
             buildConfigField 'boolean', 'ENABLE_MOCKS', 'true'
         }
     }
+
+    buildTypes.each {
+      // it.buildConfigField 'String', 'AUTH_TOKEN', 'cc7d31d28fd610c02138edc1d8a9d21468754094'
+    }
+
+
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES.txt'
         exclude 'META-INF/LICENSE.txt'
@@ -90,7 +104,14 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "tw.geothings.rekotlin:rekotlin:$rekotlin_version"
     implementation "org.rekotlinrouter:rekotlin-router:$rekotlin_router_version"
+
+
     implementation "org.kohsuke:github-api:$github_api_version"
+    implementation "com.apollographql.apollo:apollo-runtime:$apollo_gradle_plugin_version"
+    implementation "com.apollographql.apollo:apollo-android-support:$apollo_gradle_plugin_version"
+    implementation "com.apollographql.apollo:apollo-rx2-support:$apollo_gradle_plugin_version"
+    compile 'com.android.support:multidex:1.0.3'
+
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
     implementation "io.reactivex.rxjava2:rxandroid:$rxandroid"
 
@@ -120,4 +141,14 @@ repositories {
     maven {
         url 'https://rekotlin.s3-ap-southeast-1.amazonaws.com/snapshots'
     }
+}
+
+
+apollo {
+    customTypeMapping = [
+            "DateTime" : "java.util.Date",
+            "URI" : "String"
+    ]
+//    customTypeMapping['DateTime'] = "java.util.Date"
+
 }

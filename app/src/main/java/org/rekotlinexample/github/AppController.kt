@@ -1,6 +1,7 @@
 package org.rekotlinexample.github
 
 import android.app.Application
+import android.support.multidex.MultiDexApplication
 import com.squareup.leakcanary.LeakCanary
 import org.rekotlinexample.github.actions.LoggedInDataSaveAction
 import org.rekotlinexample.github.middleware.gitHubMiddleware
@@ -27,7 +28,7 @@ var mainStore = Store(state = null,
 
 var router: Router<GitHubAppState>? = null
 
-class AppController : Application() {
+class AppController : MultiDexApplication() {
 
 
     override fun onCreate() {

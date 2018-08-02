@@ -1,0 +1,32 @@
+query FindQuery($owner:String!,$name:String!){
+  repository(owner:$owner, name:$name) {
+    name
+    description
+    forkCount
+    url
+  }
+}
+
+query ListOfRepos($login: String!, $first: Int) {
+  user(login: $login) {
+    repositories(first: $first) {
+      totalCount
+      nodes {
+        createdAt
+        name
+        forkCount
+        url
+        description
+        watchers {
+          totalCount
+        }
+        stargazers{
+          totalCount
+        }
+        primaryLanguage {
+          name
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,10 @@
 package org.rekotlinexample.github.middleware
 
+import com.apollographql.apollo.api.Response
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.toSingle
+import io.reactivex.schedulers.Schedulers
 import org.rekotlinexample.github.AppController
 import org.rekotlinexample.github.BuildConfig
 import org.rekotlinexample.github.actions.*
@@ -10,6 +15,7 @@ import org.rekotlinexample.github.apirequests.PreferenceApiService
 import org.rekotlinexample.github.apirequests.PreferenceApiService.GITHUB_PREFS_KEY_LOGINSTATUS
 import org.rekotlinexample.github.apirequests.PreferenceApiService.GITHUB_PREFS_KEY_TOKEN
 import org.rekotlinexample.github.apirequests.PreferenceApiService.GITHUB_PREFS_KEY_USERNAME
+import org.rekotlinexample.github.asyntasks.RepoListGQLTask
 import org.rekotlinexample.github.states.GitHubAppState
 import org.rekotlinexample.github.states.LoggedInState
 import tw.geothings.rekotlin.*
@@ -58,6 +64,8 @@ class RepoListTaskListenerMiddleware: RepoListTaskListenerInterface {
 // App context for UT, must be never set in app run
 var testAppContext = AppController.mInstance?.applicationContext
 typealias GHLoginObservableType = Pair<LoginResultAction,Store<StateType>>
+typealias GHRepoListObservableType = Pair<Observable<Response<ListOfReposQuery.Data>>,Store<StateType>>
+typealias GHRepoListSubscriberType = Pair<RepoListCompletedAction,Store<StateType>>
 
 
 
@@ -73,7 +81,9 @@ typealias GHLoginObservableType = Pair<LoginResultAction,Store<StateType>>
                     executeSaveLoginData(action)
                 }
                 is RepoDetailListAction -> {
-                    executeGitHubRepoListRetrieval(action,dispatch)
+                   // executeGitHubRepoListRetrieval(action,dispatch)
+//                    executeGHGraphQLRepoListRetrieval(action,dispatch)
+                    executeGHGQLRepoListRetrieval(action,dispatch)
                 }
             }
 
@@ -102,6 +112,75 @@ fun executeGitHubRepoListRetrieval(action: RepoDetailListAction,dispatch: Dispat
 
             whenTestDebug {repoTask.githubService = MockGitHubApiService()}
             repoTask.execute()
+            dispatch(RepoListRetrivalStartedAction())
+            return true
+        }
+        return false
+    }
+    return false
+}
+
+
+
+fun executeGHGQLRepoListRetrieval(action: RepoDetailListAction,dispatch: DispatchFunction) : Boolean {
+
+    var userName: String? = action.userName
+    var token: String? = action.token
+    val context = testAppContext ?: AppController.mInstance?.applicationContext
+    context?.let {
+        userName = PreferenceApiService.getPreference(context, GITHUB_PREFS_KEY_USERNAME)
+        token = PreferenceApiService.getPreference(context, GITHUB_PREFS_KEY_TOKEN)
+    }
+    //TODO: Fix this hardcoding
+
+    token = BuildConfig.AUTH_TOKEN
+    val repoListTaskListenerMiddleware = RepoListTaskListenerMiddleware()
+
+    userName?.let {
+        token?.let {
+
+            val repoTask = RepoListGQLTask(userName = userName as String,
+                    token = token as String,
+                    repoListTaskListener = repoListTaskListenerMiddleware)
+
+            repoTask.getGHRepoObservable().toSingle()
+                    .subscribeOn(Schedulers.io())
+                    ?.observeOn(AndroidSchedulers.mainThread())
+                    ?.subscribeWith(repoTask.getRepoListSubscriber())
+
+           // whenTestDebug {repoTask.githubService = MockGitHubApiService()}
+            dispatch(RepoListRetrivalStartedAction())
+            return true
+        }
+        return false
+    }
+    return false
+}
+
+fun executeGHGraphQLRepoListRetrieval(action: RepoDetailListAction,dispatch: DispatchFunction) : Boolean {
+
+    var userName: String? = action.userName
+    var token: String? = action.token
+    val context = testAppContext ?: AppController.mInstance?.applicationContext
+    context?.let {
+        userName = PreferenceApiService.getPreference(context, GITHUB_PREFS_KEY_USERNAME)
+        token = PreferenceApiService.getPreference(context, GITHUB_PREFS_KEY_TOKEN)
+    }
+    //TODO: Fix this hardcoding
+
+    token = BuildConfig.AUTH_TOKEN
+    val repoListTaskListenerMiddleware = RepoListTaskListenerMiddleware()
+
+    userName?.let {
+        token?.let {
+
+            val repoTask = RepoListGQLTask(userName = userName as String,
+                    token = token as String,
+                    repoListTaskListener = repoListTaskListenerMiddleware)
+
+            repoTask.getRepos()
+
+            whenTestDebug {repoTask.githubService = MockGitHubApiService()}
             dispatch(RepoListRetrivalStartedAction())
             return true
         }
