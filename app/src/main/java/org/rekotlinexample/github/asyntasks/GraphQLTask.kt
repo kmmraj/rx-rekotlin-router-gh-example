@@ -7,25 +7,24 @@ import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
+import com.apollographql.apollo.response.CustomTypeAdapter
+import com.apollographql.apollo.response.CustomTypeValue
+import com.apollographql.apollo.rx2.Rx2Apollo
+import io.reactivex.SingleObserver
+import io.reactivex.disposables.Disposable
 import okhttp3.OkHttpClient
+import org.rekotlinexample.github.actions.RepoListCompletedAction
 import org.rekotlinexample.github.apirequests.GitHubApi
 import org.rekotlinexample.github.apirequests.GitHubApiService
-import com.apollographql.apollo.response.CustomTypeValue
-import com.apollographql.apollo.response.CustomTypeAdapter
 import org.rekotlinexample.github.controllers.RepoViewModel
 import org.rekotlinexample.github.mainStore
+import org.rekotlinexample.github.middleware.GHRepoListObservableType
 import org.rekotlinexample.github.middleware.RepoListTaskListenerInterface
 import tw.geothings.rekotlin.StateType
 import tw.geothings.rekotlin.Store
 import type.CustomType
-import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.*
-import com.apollographql.apollo.rx2.Rx2Apollo
-import io.reactivex.SingleObserver
-import io.reactivex.disposables.Disposable
-import org.rekotlinexample.github.actions.RepoListCompletedAction
-import org.rekotlinexample.github.middleware.GHRepoListObservableType
 
 
 /**
@@ -58,11 +57,8 @@ class RepoListGQLTask (val userName:String,
 
                     override fun onResponse(response: Response<ListOfReposQuery.Data>) {
                         //TODO: Start here
-                        val data: ListOfReposQuery.Data? = response.data()
-                        val user: ListOfReposQuery.User? = response.data()?.user()
                         val repositories: ListOfReposQuery.Repositories? = response.data()?.user()?.repositories()
-                        val totalCount = response.data()?.user()?.repositories()?.totalCount()
-                        var repoViewModelList = arrayListOf<RepoViewModel>()
+                        val repoViewModelList = arrayListOf<RepoViewModel>()
 
                         repositories?.nodes()?.size
                         repositories?.let {
@@ -70,7 +66,7 @@ class RepoListGQLTask (val userName:String,
                                 for(repo in it){
                                     repo.createdAt()
 
-                                    val repoUrl = repo.url().toString() //. .htmlUrl.protocol.plus("://").plus(repo.htmlUrl.host).plus(repo.htmlUrl.path)
+                                    val repoUrl = repo.url()
                                     val repoVM = RepoViewModel(repoName = repo.name(),
                                             watchers = repo.watchers().totalCount(),
                                             stargazersCount = repo.stargazers().totalCount(),
@@ -93,8 +89,8 @@ class RepoListGQLTask (val userName:String,
 
 
      fun getGHRepoObservable(): GHRepoListObservableType {
-        //Create an ApolloPrefetch object
-          apolloClient = setupApollo(token)
+
+         apolloClient = setupApollo(token)
          val query = ListOfReposQuery.builder().login(userName)
                 .first(100)
                 .build()
@@ -153,18 +149,13 @@ class RepoListGQLTask (val userName:String,
     private fun setupApollo(authToken: String): ApolloClient {
 
         val dateTimeCustomTypeAdapter = object : CustomTypeAdapter<Date> {
-            //val ISO8601_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-//            val ISO8601_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US)
             val ISO8601_DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-
-
             override fun decode(value: CustomTypeValue<*>): Date? {
                 try {
                     return ISO8601_DATE_FORMAT.parse(value.value.toString())
                 } catch (ex: ParseException) {
                     throw RuntimeException(ex)
                 }
-
             }
 
             override fun encode(value: Date): CustomTypeValue<*> {
@@ -172,23 +163,6 @@ class RepoListGQLTask (val userName:String,
             }
         }
 
-
-        val uriCustomTypeAdapter = object : CustomTypeAdapter<URI> {
-
-
-            override fun decode(value: CustomTypeValue<*>): URI? {
-                try {
-                    return URI.create(value.toString())
-                } catch (ex: ParseException) {
-                    throw RuntimeException(ex)
-                }
-
-            }
-
-            override fun encode(value: URI): CustomTypeValue<String> {
-                return CustomTypeValue.GraphQLString(value.toString())
-            }
-        }
 
         val okHttp = OkHttpClient.Builder().addInterceptor { chain ->
                     val original = chain.request()
@@ -199,11 +173,11 @@ class RepoListGQLTask (val userName:String,
                     chain.proceed(builder.build())
                 }
                 .build()
+
         return ApolloClient.builder()
                 .serverUrl(BASE_URL)
                 .okHttpClient(okHttp)
                 .addCustomTypeAdapter(CustomType.DATETIME, dateTimeCustomTypeAdapter)
-            //    .addCustomTypeAdapter(CustomType.URI, uriCustomTypeAdapter)
                 .build()
     }
 }
