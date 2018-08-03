@@ -133,13 +133,15 @@ fun executeGHGQLRepoListRetrieval(action: RepoDetailListAction,dispatch: Dispatc
     }
     //TODO: Fix this hardcoding
 
-    token = BuildConfig.AUTH_TOKEN
+   // token = BuildConfig.AUTH_TOKEN
     val repoListTaskListenerMiddleware = RepoListTaskListenerMiddleware()
 
     userName?.let {
         token?.let {
 
-            val repoTask = RepoListGQLTask(userName = userName as String,
+            val userNameWithOutEmail = userName?.substringBefore('@')
+
+            val repoTask = RepoListGQLTask(userName = userNameWithOutEmail as String,
                     token = token as String,
                     repoListTaskListener = repoListTaskListenerMiddleware)
 
@@ -168,7 +170,7 @@ fun executeGHGraphQLRepoListRetrieval(action: RepoDetailListAction,dispatch: Dis
     }
     //TODO: Fix this hardcoding
 
-    token = BuildConfig.AUTH_TOKEN
+   // token = BuildConfig.AUTH_TOKEN
     val repoListTaskListenerMiddleware = RepoListTaskListenerMiddleware()
 
     userName?.let {

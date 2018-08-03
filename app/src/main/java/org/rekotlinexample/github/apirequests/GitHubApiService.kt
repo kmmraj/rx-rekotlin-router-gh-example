@@ -5,15 +5,19 @@ package org.rekotlinexample.github.apirequests
  */
 
 
+import org.eclipse.egit.github.core.client.GitHubClient
+import org.eclipse.egit.github.core.service.OAuthService
 import org.json.JSONObject
 import org.kohsuke.github.*
 import org.kohsuke.github.GHAuthorization.*
 import org.rekotlinexample.github.actions.LoginDataModel
-import org.rekotlinexample.github.actions.LoginResultAction
 import org.rekotlinexample.github.controllers.RepoViewModel
 import org.rekotlinexample.github.states.LoggedInState
 import java.io.IOException
 import java.lang.Exception
+import org.eclipse.egit.github.core.Authorization
+
+
 
 
 val GITHUB_URL = "https://api.github.com"
@@ -64,7 +68,7 @@ class GitHubApiService : GitHubApi {
 
 
     @Throws(IOException::class)
-    override fun createToken(username: String,
+     fun createGHToken(username: String,
                              password: String): LoginDataModel {
         val gitHub = GitHubBuilder()
                 .withEndpoint(GITHUB_URL)
@@ -86,6 +90,53 @@ class GitHubApiService : GitHubApi {
             loginDataModel.createdAt = gitHub.getMyself().getCreatedAt()
             loginDataModel.location = gitHub.getMyself().getLocation()
         } catch (ex: GHFileNotFoundException){
+            ex.printStackTrace()
+            //{"message":"Bad credentials","documentation_url":"https://developer.github.com/v3"}
+            loginDataModel.message = JSONObject(ex.message).get("message").toString()
+        } catch (ex: Exception){
+            ex.printStackTrace()
+            loginDataModel.message = JSONObject(ex.message).get("message").toString()
+        }
+
+        return loginDataModel
+    }
+
+
+    @Throws(IOException::class)
+    override fun createToken(username: String,
+                             password: String): LoginDataModel {
+
+
+//        val gitHub = GitHubBuilder()
+//                .withEndpoint(GITHUB_URL)
+//                .withPassword(username, password)
+//                .build()
+
+
+        val dateTimeString: String = System.currentTimeMillis().toString()
+        val note = "test-android-github-2A".plus(dateTimeString)
+
+        val client = GitHubClient()
+        client.setCredentials(username, password)
+        val oAuthService = OAuthService(client)
+       // oAuthService.setScopes(1001, GH_REQUIRED_SCOPE)
+        val auth = Authorization()
+        auth.note = note
+        auth.noteUrl = null
+        auth.scopes = GH_REQUIRED_SCOPE
+
+
+        val loginDataModel = LoginDataModel(userName = username)
+
+        try {
+            val authToken = oAuthService.createAuthorization(auth)
+           // val ghAuthorization = gitHub.createToken(GH_REQUIRED_SCOPE, note, null)
+            loginDataModel.token = authToken.token
+            loginDataModel.loginStatus = LoggedInState.loggedIn
+           // loginDataModel.fullName = gitHub.getMyself().getName()
+            loginDataModel.createdAt = authToken.createdAt
+           // loginDataModel.location = gitHub.getMyself().getLocation()
+        } catch (ex: IOException){
             ex.printStackTrace()
             //{"message":"Bad credentials","documentation_url":"https://developer.github.com/v3"}
             loginDataModel.message = JSONObject(ex.message).get("message").toString()

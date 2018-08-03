@@ -27,7 +27,6 @@ ext {
     awaitility_version = "3.0.0"
     leakcanary_android_version = "1.5.4"
 
-    AUTH = "cc7d31d28fd610c02138edc1d8a9d21468754094"
 
 }
 
@@ -54,8 +53,7 @@ android {
         debug {
             //Enable the line below to prevent the app from crashing.
             testCoverageEnabled false
-            buildConfigField 'boolean', 'ENABLE_MOCKS', 'true'
-            buildConfigField 'String', 'AUTH_TOKEN', '"cc7d31d28fd610c02138edc1d8a9d21468754094"'
+            buildConfigField 'boolean', 'ENABLE_MOCKS', 'false'
         }
         release {
             minifyEnabled true
@@ -66,9 +64,6 @@ android {
         }
     }
 
-    buildTypes.each {
-      // it.buildConfigField 'String', 'AUTH_TOKEN', 'cc7d31d28fd610c02138edc1d8a9d21468754094'
-    }
 
 
     packagingOptions {
@@ -111,6 +106,7 @@ dependencies {
     implementation "com.apollographql.apollo:apollo-android-support:$apollo_gradle_plugin_version"
     implementation "com.apollographql.apollo:apollo-rx2-support:$apollo_gradle_plugin_version"
     compile 'com.android.support:multidex:1.0.3'
+    implementation 'org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5'
 
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
     implementation "io.reactivex.rxjava2:rxandroid:$rxandroid"
